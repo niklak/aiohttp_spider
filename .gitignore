@@ -1,0 +1,14 @@
+*.py[co]
+*.sw[po]
+*~
+*.log
+*.egg-info
+*.py.disabled
+.project
+/dist/
+/build/
+__pycache__/
+/run
+/logs
+**/.idea/*
+/media
