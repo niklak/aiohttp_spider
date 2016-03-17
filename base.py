@@ -82,7 +82,7 @@ class AWebSpider:
         """
         :param url: an url from which html will be parsed.
         :return: it has to return a dict with data.
-        It must be coroutine.
+        It must be a coroutine.
         """
         raise NotImplementedError
 

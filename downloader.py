@@ -9,8 +9,6 @@ class Downloader:
     def __init__(self, links, download_to, exclude=None, headers=None,
                  concurrency=2, streaming=False, sub_dirs=True, verbose=True):
 
-        print
-        print(isinstance(links, (list, tuple)))
         self.links = links
         self.path = download_to
         self.exclude = exclude if exclude is not None else ''
