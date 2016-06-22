@@ -12,3 +12,4 @@ __pycache__/
 /logs
 **/.idea/*
 /media
+/tier.py

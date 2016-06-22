@@ -2,10 +2,12 @@ import time
 import logging
 import json
 import csv
+import re
 import asyncio
 import aiohttp
 from collections import defaultdict
 from urllib.parse import urljoin, urldefrag
+from urllib.parse import unquote
 from lxml import html
 
 
@@ -45,7 +47,7 @@ class AWebSpider:
 
     def __init__(self, base_url, capture_pattern, concurrency=2, timeout=300,
                  delay=0, headers=None, exclude=None, verbose=True,
-                 output='json', max_crawl=0, max_parse=0,
+                 output='json', max_crawl=0, max_parse=0, cookies=None,
                  start_url=None, retries=2):
 
         assert output in self.OUTPUT_FORMATS, 'Unsupported output format'
@@ -54,7 +56,7 @@ class AWebSpider:
 
         self.base = base_url
         self.start_url = self.base if not start_url else start_url
-        self.capture = capture_pattern
+        self.capture = re.compile(capture_pattern)
         self.exclude = exclude if isinstance(exclude, list) else []
 
         self.concurrency = concurrency
@@ -76,7 +78,9 @@ class AWebSpider:
         if not verbose:
             self.log.disabled = True
 
-        self.client = aiohttp.ClientSession(headers=headers)
+        if not cookies:
+            cookies = dict()
+        self.client = aiohttp.ClientSession(headers=headers, cookies=cookies)
 
     def get_parsed_content(self, url):
         """
@@ -93,11 +97,12 @@ class AWebSpider:
         for href in dom.xpath('//a/@href'):
             if any(e in href for e in self.exclude):
                     continue
-            url = urljoin(self.base, urldefrag(href)[0])
+            url = unquote(urljoin(self.base, urldefrag(href)[0]))
             if url.startswith(self.base):
-                if self.capture in url:
+                if self.capture.search(url):
                     urls_to_parse.append(url)
-                urls.append(url)
+                else:
+                    urls.append(url)
         return urls, urls_to_parse
 
     async def get_html_from_url(self, url):
@@ -148,6 +153,8 @@ class AWebSpider:
 
             if not self.can_parse and self.q_parse.qsize() > 0:
                     self.can_parse = True
+        except Exception as exc:
+            self.log.warn('Exception {}:'.format(exc))
 
         finally:
             self.q_crawl.task_done()

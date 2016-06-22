@@ -23,7 +23,7 @@ class WikiCrawler(AWebSpider):
 if __name__ == '__main__':
 
     base_url = 'https://en.wikipedia.org/'
-    capture = '/wiki/'
+    capture = r'/wiki/'
     exclude = [':']
     concurrency = 2
     max_crawl = 10
